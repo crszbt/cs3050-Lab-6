@@ -167,7 +167,7 @@ void dijkstra(Graph* g, int start_idx, int end_idx, double* dist, int* prev, int
             //for each node, the program checks which of the connected nodes has the highest priority and analyzes there first, instead of just checking each edge in order:
             while(edge!=NULL)
             {
-            if(!((edge->to).priority > (nodes[current.node]).priority)) //if the next node is NOT of a higher priority...
+            if(!((g->nodes[edge->to]).priority > (g->nodes[current.node]).priority)) //if the next node is NOT of a higher priority...
             {
                 edge = g->adj_list[u+1]; //check the next node
             }
@@ -178,7 +178,7 @@ void dijkstra(Graph* g, int start_idx, int end_idx, double* dist, int* prev, int
             //next, check nodes that are EQUAL in priority...
             while(edge!=NULL)
             {
-            if(!((edge->to).priority = (nodes[current.node]).priority)) //if the next node is NOT of the same priority...
+            if(!((g->nodes[edge->to]).priority = (g->nodes[current.node]).priority)) //if the next node is NOT of the same priority...
             {
                 edge = g->adj_list[u+1]; //check the next node
             }
@@ -187,7 +187,7 @@ void dijkstra(Graph* g, int start_idx, int end_idx, double* dist, int* prev, int
             }
             }
             //continue...
-            //DESIGN DECISION: by prioritizing nodes in the immediate vicinity that have a higher or equal priority, they are still analyzed in ALMOST the shortest path, but the algorithsm will proprotize going towards a more important node over a closer one if at a crossroads. This way, priority nodes still get analyzed first, unless a non-priority node is required to pass to get to the priority node ANYWAY
+            //DESIGN DECISION: by priritizing nodes in the immediate vicinity that have a higher or equal priority, they are still analyzed in ALMOST the shortest path, but the algorithsm will proprotize going towards a more important node over a closer one if at a crossroads. This way, priority nodes still get analyzed first, unless a non-priority node is required to pass to get to the priority node ANYWAY
             int v = edge->to;
             double alt = dist[u] + edge->weight;
             
@@ -359,7 +359,7 @@ int main(int argc, char* argv[]) {
         int id, priority;
         double lat, lon;
         long earliest, latest;
-        if (sscanf(line, "%d,%lf,%lf,%ld,%d,%d", &id, &lat, &lon, %earliest, %latest, %priority) == 3) { //gathers everything from file, including priority
+        if (sscanf(line, "%d,%lf,%lf,%ld,%ld,%d", &id, &lat, &lon, &earliest, &latest, &priority) == 3) { //gathers everything from file, including priority
             g.nodes[g.node_count].id = id;
             g.nodes[g.node_count].lat = lat;
             g.nodes[g.node_count].lon = lon;
