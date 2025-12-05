@@ -9,12 +9,18 @@
 #define MAX_NODES 10000
 #define MAX_EDGES 50000
 #define EARTH_RADIUS 6371.0
+#define HIGH 1 //high priority
+#define MEDIUM 0 //medium priority
+#define LOW -1 //low priority
 
 // Node structure
 typedef struct {
     int id;
     double lat;
     double lon;
+    int earliest; //earliest integer
+    int latest; //latest integer
+    int priority; //priority integer
 } Node;
 
 // Edge structure
@@ -158,10 +164,48 @@ void dijkstra(Graph* g, int start_idx, int end_idx, double* dist, int* prev, int
         
         Edge* edge = g->adj_list[u];
         while (edge != NULL) {
+            //for each node, the program checks which of the connected nodes has the highest priority and analyzes there first, instead of just checking each edge in order:
+            while(edge!=NULL)
+            {
+            if(!((edge->to).priority > (nodes[current.node]).priority)) //if the next node is NOT of a higher priority...
+            {
+                edge = g->adj_list[u+1]; //check the next node
+            }
+            else{
+                break; //if it is, break
+            }
+            }
+            //next, check nodes that are EQUAL in priority...
+            while(edge!=NULL)
+            {
+            if(!((edge->to).priority = (nodes[current.node]).priority)) //if the next node is NOT of the same priority...
+            {
+                edge = g->adj_list[u+1]; //check the next node
+            }
+            else{
+                break; //if it is, break
+            }
+            }
+            //continue...
+            //DESIGN DECISION: by prioritizing nodes in the immediate vicinity that have a higher or equal priority, they are still analyzed in ALMOST the shortest path, but the algorithsm will proprotize going towards a more important node over a closer one if at a crossroads. This way, priority nodes still get analyzed first, unless a non-priority node is required to pass to get to the priority node ANYWAY
             int v = edge->to;
             double alt = dist[u] + edge->weight;
             
-            if (alt < dist[v]) {
+            if (alt < dist[v]) { 
+                if(!(alt >= (g->nodes[u]).earliest)) //if the node is too early...
+                {
+                    while(!(dist[v] >= (g->nodes[u]).earliest)) //until the time is right
+                    {
+                        alt++; //wait (to ensure that nodes aren't skipped just for being too early)
+                        //DESIGN DECISION: this way, nodes will never be reached early, meaning that the program only has to handle an error message for nodes visited late. Realistically, arriving eary is much less of an issue than arriving late, so it doesn't make sense to try and reroute completely just to avod an early arrival, since we can just wait for the proper time.
+                    }
+                }
+                else if(!(alt <= (g->nodes[u]).latest)) //if the node is too late...
+                {
+                    printf("No feasible path satisfying time constraints\n"); //prints error message
+                    printf("Node could not be reached in time\n"); //specify that node could not be reached in time
+                }
+                //proceed as normal...
                 dist[v] = alt;
                 prev[v] = u;
                 pq_push(&pq, v, alt);
@@ -213,6 +257,8 @@ void astar(Graph* g, int start_idx, int end_idx, double* dist, int* prev, int* n
 
 // Bellman-Ford algorithm
 int bellman_ford(Graph* g, int start_idx, int end_idx, double* dist, int* prev, int* nodes_explored) {
+    if(end_idx)//had to put this here because it wouldn't compile otherwise
+    {}
     for (int i = 0; i < g->node_count; i++) {
         dist[i] = DBL_MAX;
         prev[i] = -1;
@@ -310,12 +356,16 @@ int main(int argc, char* argv[]) {
     fgets(line, sizeof(line), fp); // Skip header
     
     while (fgets(line, sizeof(line), fp)) {
-        int id;
+        int id, priority;
         double lat, lon;
-        if (sscanf(line, "%d,%lf,%lf", &id, &lat, &lon) == 3) {
+        long earliest, latest;
+        if (sscanf(line, "%d,%lf,%lf,%ld,%d,%d", &id, &lat, &lon, %earliest, %latest, %priority) == 3) { //gathers everything from file, including priority
             g.nodes[g.node_count].id = id;
             g.nodes[g.node_count].lat = lat;
             g.nodes[g.node_count].lon = lon;
+            g.nodes[g.node_count].earliest = earliest; //stores earliest int
+            g.nodes[g.node_count].latest = latest; //stores latest int
+            g.nodes[g.node_count].priority = priority; //stores priority int
             g.node_ids[g.node_count] = id;
             g.node_count++;
         }
